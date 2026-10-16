@@ -1,0 +1,151 @@
+E-commerce Catalog
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ShopSphere | E-commerce</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:#f8fafc;color:#172033}
+header{background:#111827;color:white;padding:20px 6%;display:flex;justify-content:space-between;align-items:center;gap:15px;flex-wrap:wrap}
+header h1{margin:0;color:#a5f3fc}
+nav a{color:white;text-decoration:none;margin-left:15px}
+.hero{padding:55px 6%;background:linear-gradient(120deg,#cffafe,#e0e7ff)}
+.hero h2{font-size:2.5rem;margin:0 0 12px}
+main{padding:35px 6%}
+.toolbar{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:25px}
+input,select{padding:12px;border:1px solid #cbd5e1;border-radius:8px;font-size:15px}
+input{flex:1;min-width:180px}
+.products{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:22px}
+.card{background:white;border-radius:14px;overflow:hidden;box-shadow:0 4px 15px #0f172a12;transition:transform .2s}
+.card:hover{transform:translateY(-5px)}
+.card img{width:100%;height:190px;object-fit:cover;background:#e2e8f0}
+.details{padding:18px}
+.details h3{margin-top:0}
+.price{font-size:1.3rem;font-weight:bold;color:#0f766e}
+button{background:#0f766e;color:white;border:0;border-radius:8px;padding:11px 15px;cursor:pointer;font-weight:bold}
+button:hover{background:#115e59}
+footer{text-align:center;padding:25px;background:#111827;color:white}
+#message{color:#0f766e}
+@media(max-width:500px){.hero h2{font-size:2rem}header{padding:18px}}
+</style>
+</head>
+<body>
+<header>
+<h1>ShopSphere</h1>
+<nav><a href="#home">Home</a><a href="#products">Products</a></nav>
+<div>🛒 Cart: <strong id="cartCount">0</strong></div>
+</header>
+
+<section class="hero" id="home">
+<h2>Find Your Next Favorite</h2>
+<p>Explore our curated collection of everyday essentials.</p>
+<a href="#products"><button>Shop Now</button></a>
+</section>
+
+<main id="products">
+<h2>Our Products</h2>
+<div class="toolbar">
+<input id="search" placeholder="Search products..." aria-label="Search products">
+<select id="category" aria-label="Filter by category">
+<option value="All">All Categories</option>
+<option value="Electronics">Electronics</option>
+<option value="Fashion">Fashion</option>
+<option value="Home">Home</option>
+</select>
+<select id="sort" aria-label="Sort products">
+<option value="default">Sort By</option>
+<option value="low">Price: Low to High</option>
+<option value="high">Price: High to Low</option>
+</select>
+</div>
+<p id="message" role="status"></p>
+<div class="products" id="productList"></div>
+</main>
+
+<footer>© 2026 ShopSphere. Demo E-commerce Project.</footer>
+
+<script>
+const products = [
+{id:1,name:"Wireless Headphones",category:"Electronics",price:2499,image:"https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500"},
+{id:2,name:"Smart Watch",category:"Electronics",price:3999,image:"https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500"},
+{id:3,name:"Running Shoes",category:"Fashion",price:1899,image:"https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500"},
+{id:4,name:"Classic Backpack",category:"Fashion",price:1299,image:"https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=500"},
+{id:5,name:"Desk Lamp",category:"Home",price:899,image:"https://images.unsplash.com/photo-1507473885765-e6ed057f782c?w=500"},
+{id:6,name:"Coffee Mug",category:"Home",price:399,image:"https://images.unsplash.com/photo-1514228742587-6b1558fcca3d?w=500"}
+];
+
+let cart = 0;
+const list = document.getElementById("productList");
+const search = document.getElementById("search");
+const category = document.getElementById("category");
+const sort = document.getElementById("sort");
+const message = document.getElementById("message");
+
+function renderProducts() {
+  const query = search.value.trim().toLowerCase();
+  let filtered = products.filter(p =>
+    p.name.toLowerCase().includes(query) &&
+    (category.value === "All" || p.category === category.value)
+  );
+
+  if (sort.value === "low") filtered.sort((a,b) => a.price-b.price);
+  if (sort.value === "high") filtered.sort((a,b) => b.price-a.price);
+
+  list.replaceChildren();
+
+  if (!filtered.length) {
+    list.textContent = "No products found. Try another search.";
+    return;
+  }
+
+  filtered.forEach(p => {
+    const card = document.createElement("article");
+    card.className = "card";
+
+    const img = document.createElement("img");
+    img.src = p.image;
+    img.alt = p.name;
+    img.loading = "lazy";
+    img.onerror = () => {
+      img.removeAttribute("src");
+      img.alt = p.name + " image unavailable";
+    };
+
+    const details = document.createElement("div");
+    details.className = "details";
+
+    const title = document.createElement("h3");
+    title.textContent = p.name;
+
+    const type = document.createElement("p");
+    type.textContent = p.category;
+
+    const price = document.createElement("p");
+    price.className = "price";
+    price.textContent = "₹" + p.price.toLocaleString("en-IN");
+
+    const button = document.createElement("button");
+    button.textContent = "Add to Cart";
+    button.addEventListener("click", () => {
+      cart++;
+      document.getElementById("cartCount").textContent = cart;
+      message.textContent = p.name + " added to cart!";
+    });
+
+    details.append(title, type, price, button);
+    card.append(img, details);
+    list.append(card);
+  });
+}
+
+search.addEventListener("input", renderProducts);
+category.addEventListener("change", renderProducts);
+sort.addEventListener("change", renderProducts);
+renderProducts();
+</script>
+</body>
+</html>
+```
